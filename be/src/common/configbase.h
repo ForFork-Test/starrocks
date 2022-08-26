@@ -21,6 +21,11 @@
 #include <string>
 #include <vector>
 
+/*
+ * configbase.h是config最基础的文件，比config.h更基础
+ * config.h include了configbase.h 
+ */
+
 namespace starrocks {
 class Status;
 
@@ -57,6 +62,16 @@ public:
 
 #define DECLARE_FIELD(FIELD_TYPE, FIELD_NAME) extern FIELD_TYPE FIELD_NAME;
 
+/*
+ * 注意__IN_CONFIGBASE_CPP__这个宏。
+ * 当定义了这个宏时，DEFINE_FIELD宏会定义配置项的全局变量，并且创建与配置项对应的Register对象，然后会通过
+ * cofigbase::init这个函数对于每个配置项要么设置一个默认值，要么设置从配置文件中读取到的值。设置值的过程由
+ * props.get完成。
+ * 
+ * 当未定义这个宏时，引用该头文件对于配置项只是做声明：extern ... 
+ * 
+ * 所以，在整个codebase中通过定义__IN_CONFIGBASE_CPP__这个宏，完成对配置变量的定义，否则完成对配置变量的声明。
+ */
 #ifdef __IN_CONFIGBASE_CPP__
 #define CONF_Bool(name, defaultstr) DEFINE_FIELD(bool, name, defaultstr, false)
 #define CONF_Int16(name, defaultstr) DEFINE_FIELD(int16_t, name, defaultstr, false)
